@@ -25,7 +25,6 @@ def checkCommandLine(bin_bool, bout_bool):
                 std_input.append(format(int(bin(b & 15)[2:], 2), '04b'))
     else:
         std_input = list(args.replace(' ', ''))
-    print std_input
     checkStandardInput(bin_bool, bout_bool, std_input)
 
 def checkStandardInput(bin_bool, bout_bool, std_input):
@@ -46,7 +45,25 @@ def toBinary(bin_bool, std_input):
                      '4':'0100', '5':'0101', '6':'0110', '7':'0111',
                      '8':'1000', '9':'1001', 'A':'1010', 'B':'1011',
                      'C':'1100', 'D':'1101', 'E':'1110', 'F':'1111'}
-    print std_input
+    x = 0
+    chr_str = ''
+    for hexas in std_input:
+        if x == 2:
+            chr_str += ' '
+            x = 1
+        else:
+            x += 1
+        if not bin_bool:
+            hexas = hexas.upper()
+            chr_str += hex_bin_table[hexas]
+        else:
+            chr_str += hexas
+    chr_bins = chr_str.split(' ')
+    chr_str = ''
+    for bins in chr_bins:
+        chr_str += chr(int(bins, 2))
+    print chr_str
+    sys.stdout.write('\n')
 
 def toHex(bin_bool, std_input):
     bin_hex_table = {'0000':'0', '0001':'1', '0010':'2', '0011':'3',
