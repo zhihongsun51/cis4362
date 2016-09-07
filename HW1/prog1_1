@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 
 def checkCommandLine(bin_bool, bout_bool):
@@ -24,6 +25,7 @@ def checkCommandLine(bin_bool, bout_bool):
                 std_input.append(format(int(bin(b >> 4)[2:], 2), '04b'))
                 std_input.append(format(int(bin(b & 15)[2:], 2), '04b'))
     else:
+        args = args.replace('\n', '')
         std_input = list(args.replace(' ', ''))
     checkStandardInput(bin_bool, bout_bool, std_input)
 
@@ -62,8 +64,7 @@ def toBinary(bin_bool, std_input):
     chr_str = ''
     for bins in chr_bins:
         chr_str += chr(int(bins, 2))
-    print chr_str
-    sys.stdout.write('\n')
+    sys.stdout.write(chr_str)
 
 def toHex(bin_bool, std_input):
     bin_hex_table = {'0000':'0', '0001':'1', '0010':'2', '0011':'3',
@@ -94,4 +95,3 @@ if __name__ == "__main__" :
     bin_bool = True
     bout_bool = False
     checkCommandLine(bin_bool, bout_bool)
-    
