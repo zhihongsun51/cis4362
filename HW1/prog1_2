@@ -1,18 +1,96 @@
 #!/usr/bin/python
 
 import sys
-import prog1_1
+import re
 
 def checkCommandLine():
+    filename = ''
+    enc_bool = True # True if encrypting
+    key_bool = True # True if key is in binary
+    args = ''
     for cmd in sys.argv[1:]:
-        pass
+        if cmd == '-e':
+            pass
+        elif cmd == '-d':
+            enc_bool = False
+        elif cmd == '-x':
+            key_bool = False
+        elif cmd == '-b':
+            pass
+        elif re.match(r'-k.*', cmd, flags=0):
+            if len(cmd) is not 2:
+                filename = cmd[2:]
+            else:
+                raise ValueError('Please enter a valid filename')
+        else:
+            args += cmd
+    print args
+    checkInput(enc_bool, key_bool, filename, args)
 
-def encrypt():
-    pass
+def checkInput(enc_bool, key_bool, filename, args):
+    std_input = []
+    if all(c in ['0', '1'] for c in list(args.replace(' ', ''))):
+        std_input = [args[i:i+4] for i in range(0, len(args), 4)]
+    elif all(c in ['0', '1', '2', '3', '4', '5',
+                   '6', '7', '8', '9', 'a', 'b',
+                   'c', 'd', 'e', 'f', 'A', 'B',
+                   'C', 'D', 'E', 'F']
+             for c in list(args.replace(' ', ''))):
+        std_input = list(args.replace(' ', ''))
+        
+    else:
+        args = [int(format(ord(i), '08b'), 2) for i in list(args)]
+        for b in args:
+            std_input.append(hex(int(bin(b >> 4)[2:], 2))[2:])
+            std_input.append(hex(int(bin(b & 15)[2:], 2))[2:])
+    print std_input
+    key = processKey(key_bool, filename)
+    encrypt_or_decrypt(enc_bool, key, std_input)
+    
+def processKey(key_bool, filename):
+    keyfile = open(filename, 'r')
+    key_vals = keyfile.read().replace(' ', '')
+    key = {}
+    if key_bool:
+        print key_vals
+    else:
+        key_vals = list(key_vals)
+        for k in key_vals:
+            key[hex(key_vals.index(k))[2:]] = k
+    return key
 
-def decrypt():
-    pass
+def encrypt_or_decrypt(enc_bool, key, std_input):
+    output = []
+    if enc_bool:
+        for val in std_input:
+            output.append(key[val])
+    else:
+        for val in std_input:
+            for k, v in key.items():
+                if val == v:
+                    output.append(k)    
+    x = 0
+    y = 0
+    for o in output:
+        if x == 2:
+            sys.stdout.write(' ')
+            x = 1
+        else:
+            x += 1
+        if y == 24:
+            sys.stdout.write('\n')
+            y = 1
+        else:
+            y += 1
+        sys.stdout.write(o)
+
+def decrypt(key, std_input):
+    decrypted_output = []
+    for val in std_input:
+        for k, v in key.items():
+            if val == v:
+                decrypted_output.append(k)
+    print decrypted_output
 
 if __name__ == "__main__":
-    print hi
     checkCommandLine()
