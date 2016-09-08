@@ -10,14 +10,14 @@ def checkCommandLine(bin_bool, bout_bool):
         elif arg == '-bout':
             bout_bool = True
         elif arg == '-bin' or arg == '-xout':
-            pass
+            pass #binary input and hexadecimal output are default
         else:
             args += arg
     if not sys.stdin.isatty():
         for line in sys.stdin.read():
             args += line
     if bin_bool:
-        if all(c in ['0', '1'] for c in list(args)):
+        if all(c in ['0', '1'] for c in list(args.replace(' ', ''))):
             std_input = [args[i:i+4] for i in range(0, len(args), 4)]
         else:
             args = [int(format(ord(i), '08b'), 2) for i in list(args)]
@@ -75,6 +75,7 @@ def toHex(bin_bool, std_input):
     y = 0
     output_str = ''
     for bins in std_input:
+        bins = format(int(bins, 2), '04b')
         if x == 2:
             output_str += ' '
             x = 1
