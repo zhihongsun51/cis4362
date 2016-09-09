@@ -20,11 +20,14 @@ def check_command_line():
                 block_size = int(args[2:])
         else:
             pad_input += args
+    if not sys.stdin.isatty():
+        for line in sys.stdin.read():
+            pad_input += line
     pad_input = [ord(i) for i in pad_input]
     if pad_bool:
         pad(pad_input, block_size)
     else:
-        unpad(pad_input, pad_size)
+        unpad(pad_input, block_size)
         
 def pad(pad_input, block_size):
     pad_size = block_size - (len(pad_input) % block_size)
@@ -34,10 +37,13 @@ def pad(pad_input, block_size):
         sys.stdout.write(chr(x))
         
 def unpad(pad_input, block_size):
-    if not pad_input[:1] = pad_input[block_size-2:1]:
+    pad_size = pad_input[block_size-1]
+    if not pad_input[block_size-1] == pad_input[block_size-2]:
         raise ValueError('The last two characters are not the same, there appears to be no padding')
     else:
-        print 'hi'
+        pad_input = pad_input[:block_size-pad_size]
+        for x in pad_input:
+            sys.stdout.write(chr(x))
     
 if __name__ == '__main__':
     check_command_line()
