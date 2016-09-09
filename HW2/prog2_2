@@ -1,0 +1,14 @@
+#! /usr/bin/python
+
+import sys
+
+def check_command_line():
+    enc_bool = True # True if encrypting
+    for args in sys.argv[1:]:
+        if args == '-e':
+            pass
+        elif args == '-d':
+            enc_bool = False
+
+if __name__ = '__main__':
+    check_command_line()
