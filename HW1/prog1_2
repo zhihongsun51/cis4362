@@ -24,7 +24,9 @@ def checkCommandLine():
                 raise ValueError('Please enter a valid filename')
         else:
             args += cmd
-    print args
+    if not sys.stdin.isatty():
+        for line in sys.stdin.read():
+            args += line
     checkInput(enc_bool, key_bool, filename, args)
 
 def checkInput(enc_bool, key_bool, filename, args):
@@ -36,14 +38,12 @@ def checkInput(enc_bool, key_bool, filename, args):
                    'c', 'd', 'e', 'f', 'A', 'B',
                    'C', 'D', 'E', 'F']
              for c in list(args.replace(' ', ''))):
-        std_input = list(args.replace(' ', ''))
-        
+        std_input = list(args.replace(' ', ''))       
     else:
         args = [int(format(ord(i), '08b'), 2) for i in list(args)]
         for b in args:
             std_input.append(hex(int(bin(b >> 4)[2:], 2))[2:])
             std_input.append(hex(int(bin(b & 15)[2:], 2))[2:])
-    print std_input
     key = processKey(key_bool, filename)
     encrypt_or_decrypt(enc_bool, key, std_input)
     
@@ -51,12 +51,22 @@ def processKey(key_bool, filename):
     keyfile = open(filename, 'r')
     key_vals = keyfile.read().replace(' ', '')
     key = {}
+    temp = []
     if key_bool:
-        print key_vals
+        key_vals = [int(format(ord(i), '04b'), 2) for i in list(key_vals)]
+        for b in key_vals:
+            temp.append(hex(int(bin(b >> 4)[2:], 2))[2:])
+            temp.append(hex(int(bin(b & 15)[2:], 2))[2:])
+        for k in temp:
+            key[hex(temp.index(k))[2:]] = k.upper()
     else:
+        if len(key_vals) > 16:
+            raise ValueError('Key is too long')
+        elif not isUnique(key_vals):
+            raise ValueError('Key is not unique')
         key_vals = list(key_vals)
         for k in key_vals:
-            key[hex(key_vals.index(k))[2:]] = k
+            key[hex(key_vals.index(k))[2:]] = k.upper()
     return key
 
 def encrypt_or_decrypt(enc_bool, key, std_input):
@@ -67,30 +77,23 @@ def encrypt_or_decrypt(enc_bool, key, std_input):
     else:
         for val in std_input:
             for k, v in key.items():
-                if val == v:
+                if val.lower() == v.lower():
                     output.append(k)    
     x = 0
     y = 0
+    output = [''.join(x) for x in zip(output[0::2], output[1::2])]
     for o in output:
-        if x == 2:
-            sys.stdout.write(' ')
-            x = 1
-        else:
-            x += 1
-        if y == 24:
-            sys.stdout.write('\n')
-            y = 1
-        else:
-            y += 1
-        sys.stdout.write(o)
-
-def decrypt(key, std_input):
-    decrypted_output = []
-    for val in std_input:
-        for k, v in key.items():
-            if val == v:
-                decrypted_output.append(k)
-    print decrypted_output
+        sys.stdout.write(chr(int(o, 16)))
+def isUnique(s):
+    def _contains(string, char):
+        for c in string:
+            if c == char:
+                return True
+        return False
+    for index in range(len(s)):
+        if _contains(s[:index], s[index]):
+            return False
+    return True    
 
 if __name__ == "__main__":
     checkCommandLine()
