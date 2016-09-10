@@ -20,10 +20,10 @@ def checkCommandLine(bin_bool, bout_bool):
         if all(c in ['0', '1'] for c in list(args.replace(' ', ''))):
             std_input = [args[i:i+4] for i in range(0, len(args), 4)]
         else:
-            args = [int(format(ord(i), '08b'), 2) for i in list(args)]
+            args = [ord(i) for i in list(args)]
             for b in args:
-                std_input.append(format(int(bin(b >> 4)[2:], 2), '04b'))
-                std_input.append(format(int(bin(b & 15)[2:], 2), '04b'))
+                std_input.append((b >> 4))
+                std_input.append(b & 15)
     else:
         args = args.replace('\n', '')
         std_input = list(args.replace(' ', ''))
@@ -48,23 +48,21 @@ def toBinary(bin_bool, std_input):
                      '8':'1000', '9':'1001', 'A':'1010', 'B':'1011',
                      'C':'1100', 'D':'1101', 'E':'1110', 'F':'1111'}
     x = 0
-    chr_str = ''
+    chr_str = 0
     for hexas in std_input:
         if x == 2:
-            chr_str += ' '
+            sys.stdout.write(chr(chr_str))
+            chr_str = 0
             x = 1
         else:
             x += 1
         if not bin_bool:
             hexas = hexas.upper()
-            chr_str += hex_bin_table[hexas]
+            chr_str += int(hex_bin_table[hexas], 2)
         else:
-            chr_str += hexas
-    chr_bins = chr_str.split(' ')
-    chr_str = ''
-    for bins in chr_bins:
-        chr_str += chr(int(bins, 2))
-    sys.stdout.write(chr_str)
+            chr_str = chr_str << 4
+            chr_str = chr_str | hexas
+    sys.stdout.write(chr(chr_str))
 
 def toHex(bin_bool, std_input):
     bin_hex_table = {'0000':'0', '0001':'1', '0010':'2', '0011':'3',
@@ -75,7 +73,6 @@ def toHex(bin_bool, std_input):
     y = 0
     output_str = ''
     for bins in std_input:
-        bins = format(int(bins, 2), '04b')
         if x == 2:
             output_str += ' '
             x = 1
@@ -87,7 +84,7 @@ def toHex(bin_bool, std_input):
         else:
             y += 1
         if bin_bool:
-            output_str += bin_hex_table[bins]
+            output_str += bin_hex_table[format(bins, '04b')]
         else:
             output_str += bins
     print output_str
