@@ -4,11 +4,81 @@ import sys
 
 def check_command_line():
     enc_bool = True # True if encrypting
+    block_size = 8
+    filename = ''
+    std_input = ''
     for args in sys.argv[1:]:
         if args == '-e':
             pass
         elif args == '-d':
             enc_bool = False
+        elif args[:2] == '-b':
+            if args[2:] == '':
+                raise ValueError('Option -b cannot be empty')
+            elif not args[2:].isdigit():
+                raise ValueError('Please input integers')
+            else:
+                block_size = int(args[2:])
+        elif args[:2] == '-k':
+            if args[2:] == '':
+                raise ValueError('Option -k cannot be empty')
+            else:
+                filename = args[2:]
+        else:
+            std_input += args
+    if not sys.stdin.isatty():
+        for line in sys.stdin.read():
+            std_input += line
+    key = process_key(filename, block_size)
+    std_input = [ord(i) for i in list(std_input)]
+    std_input = [std_input[i:i+block_size] for i in range(0, len(std_input), block_size)]
+    encrypt_or_decrypt(enc_bool, key,block_size, std_input)
+                
+def encrypt_or_decrypt(enc_bool, key, block_size, std_input):
+    output = []
+    if not enc_bool:
+        key = {v: k for k, v in key.items()}
+    for block in std_input:
+        if not len(block) % block_size == 0:
+            raise ValueError(
+                'All blocks must have a block size of {},'\
+                ' this block only has a block size of {}'.format(block_size, len(block)))
+        temp_block = [None] * block_size 
+        for i in range(0, len(block), 1):
+            new_pos = key[i]
+            temp_block[new_pos] = block[i]
+        output.append(temp_block)
+    for block in output:
+        for val in block:
+            sys.stdout.write(chr(val))
 
-if __name__ = '__main__':
+def process_key(filename, block_size):
+    key = {}
+    key_file = open(filename, 'r')
+    key_vals = key_file.read()
+    key_vals = [ord(i) for i in key_vals]
+    if len(key_vals) > block_size:
+        raise ValueError('Key is too long. Expected length: {}\n'\
+                         'Recieved length: {}'.format(block_size, len(key_vals)))
+    elif len(key_vals) < block_size:
+        raise ValueError('Key is too short. Expected length: {}\n'\
+                         'Recieved length: {}'.format(block_size, len(key_vals)))
+    elif not is_unique(key_vals):
+        raise ValueError('Key is not unique')
+    for i in key_vals:
+        key[key_vals.index(i)] = i
+    return key
+
+def is_unique(s):
+    def _contains(string, char):
+        for c in string:
+            if c == char:
+                return True
+        return False
+    for index in range(len(s)):
+        if _contains(s[:index], s[index]):
+            return False
+    return True
+
+if __name__ == '__main__':
     check_command_line()
