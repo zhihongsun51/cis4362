@@ -58,7 +58,8 @@ def toBinary(bin_bool, std_input):
             x += 1
         if not bin_bool:
             hexas = hexas.upper()
-            chr_str += int(hex_bin_table[hexas], 2)
+            chr_str = chr_str << 4
+            chr_str = chr_str | int(hex_bin_table[hexas], 2)
         else:
             chr_str = chr_str << 4
             chr_str = chr_str | hexas
