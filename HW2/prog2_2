@@ -37,13 +37,13 @@ def check_command_line():
 def encrypt_or_decrypt(enc_bool, key, block_size, std_input):
     output = []
     if not enc_bool:
-        key = {v: k for k, v in key.items()}
+        key = dict((v, k) for k, v in key.items())
     for block in std_input:
         if not len(block) % block_size == 0:
             raise ValueError(
                 'All blocks must have a block size of {},'\
                 ' this block only has a block size of {}'.format(block_size, len(block)))
-        temp_block = [None] * block_size 
+        temp_block = [None] * block_size
         for i in range(0, len(block), 1):
             new_pos = key[i]
             temp_block[new_pos] = block[i]
