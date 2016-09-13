@@ -1,0 +1,1 @@
+This code was coded in Python v2.7.12 but is also able to run in python 2.6.4. There are no known bugs currently but something will be sure to pop up. It will require the python code to be allowed to execute by the user in order to run properly.
